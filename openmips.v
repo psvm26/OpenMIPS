@@ -2,8 +2,8 @@
 module openmips (
     input wire clk,
     input wire rst,
-    input wire [`RegBus] rom_data_i,    //从指令存储器取到的指令
-    output wire [`RegBus] rom_addr_o,   //输出到指令存储器的地址
+    input wire [`InstBus] rom_data_i,    //从指令存储器取到的指令
+    output wire [`InstAddrBus] rom_addr_o,   //输出到指令存储器的地址
     output wire rom_ce_o                //指令存储器使能信号
 );
     
@@ -76,6 +76,14 @@ module openmips (
 
         //来自regfile的输入
         .reg1_data_i(reg1_data),    .reg2_data_i(reg2_data),
+
+        //来自执行阶段EX的输入
+        .ex_wreg_i(ex_wreg_o),      .ex_wdata_i(ex_wdata_o),
+        .ex_wd_i(ex_wd_o),
+
+        //来自访存阶段MEM的输入
+        .mem_wreg_i(mem_wreg_o),      .mem_wdata_i(mem_wdata_o),
+        .mem_wd_i(mem_wd_o),
 
         //送到regfile的信息
         .reg1_read_o(reg1_read),    .reg2_read_o(reg2_read),

@@ -1,30 +1,41 @@
 `include "defines.v"
 module ex (
     input wire rst,
-    //è¯‘ç é˜¶æ®µé€åˆ°æ‰§è¡Œé˜¶æ®µçš„ä¿¡æ¯
+    //ÒëÂë½×¶ÎËÍµ½Ö´ĞĞ½×¶ÎµÄĞÅÏ¢
     input wire [`AluOpBus] aluop_i,
     input wire [`AluSelBus] alusel_i,
     input wire [`RegBus] reg1_i,
     input wire [`RegBus] reg2_i,
     input wire [`RegAddrBus] wd_i,
     input wire wreg_i,
-    //æ‰§è¡Œçš„ç»“æœ
-    output reg [`RegAddrBus] wd_o,  //è¦å†™å…¥çš„å¯„å­˜å™¨åœ°å€
-    output reg wreg_o,              //æ˜¯å¦è¦å†™å…¥å¯„å­˜å™¨
-    output reg [`RegBus] wdata_o    //å†™å…¥å¯„å­˜å™¨çš„å€¼
+    //Ö´ĞĞµÄ½á¹û
+    output reg [`RegAddrBus] wd_o,  //ÒªĞ´ÈëµÄ¼Ä´æÆ÷µØÖ·
+    output reg wreg_o,              //ÊÇ·ñÒªĞ´Èë¼Ä´æÆ÷
+    output reg [`RegBus] wdata_o    //Ğ´Èë¼Ä´æÆ÷µÄÖµ
 );
 
-    //ä¿å­˜é€»è¾‘è¿ç®—çš„ç»“æœ
-    reg [`RegBus] logicout;
+    reg [`RegBus] logicout;         //±£´æÂß¼­ÔËËãµÄ½á¹û
+    reg [`RegBus] shiftres;         //±£´æÒÆÎ»ÔËËãµÄ½á¹û
 
-    //ä¸€ï¼šä¾æ®aluop_iæŒ‡ç¤ºçš„å­ç±»å‹è¿›è¡Œè¿ç®—
+
+    //Ò»£ºÒÀ¾İaluop_iÖ¸Ê¾µÄ×ÓÀàĞÍ½øĞĞÔËËã
+    //½øĞĞÂß¼­ÔËËã
     always @(*) begin
         if(rst == `RstEnable) begin
             logicout <= `ZeroWord;
         end else begin
             case (aluop_i)
-                `EXE_OR_OP: begin
+                `EXE_OR_OP: begin                   //Âß¼­»ò
                     logicout <= reg1_i | reg2_i;
+                end
+                `EXE_AND_OP: begin                  //Âß¼­Óë
+                    logicout <= reg1_i & reg2_i;
+                end
+                `EXE_NOR_OP: begin                  //Âß¼­»ò·Ç
+                    logicout <= ~(reg1_i | reg2_i); 
+                end
+                `EXE_XOR_OP: begin                  //Âß¼­Òì»ò
+                    logicout <= reg1_i ^ reg2_i;
                 end
                 default: begin
                     logicout <= `ZeroWord;
@@ -33,13 +44,39 @@ module ex (
         end
     end
 
-    //äºŒï¼šä¾æ®alusel_iæŒ‡ç¤ºçš„è¿ç®—ç±»å‹ï¼Œé€‰æ‹©ä¸€ä¸ªè¿ç®—ç»“æœä½œä¸ºæœ€ç»ˆç»“æœ
+    //½øĞĞÂß¼­ÔËËã
+    always @(*) begin
+        if(rst == `RstEnable) begin
+        shiftres <= `ZeroWord;
+        end else begin
+            case(aluop_i)
+                `EXE_SLL_OP: begin                      //Âß¼­×óÒÆ
+                    shiftres <= reg2_i << reg1_i[4:0];
+                end
+                `EXE_SRL_OP: begin                      //Âß¼­ÓÒÒÆ
+                    shiftres <= reg2_i >> reg1_i[4:0];
+                end 
+                `EXE_SRA_OP: begin                      //ËãÊõÓÒÒÆ
+                    shiftres <= ({32{reg2_i[31]}} << (6'd32 - {1'b0, reg1_i[4:0]})) 
+                                | reg2_i >> reg1_i[4:0];
+                end
+                default: begin
+                    shiftres <= `ZeroWord;
+                end
+            endcase 
+        end
+    end
+
+    //¶ş£ºÒÀ¾İalusel_iÖ¸Ê¾µÄÔËËãÀàĞÍ£¬Ñ¡ÔñÒ»¸öÔËËã½á¹û×÷Îª×îÖÕ½á¹û
     always @(*) begin
         wd_o <= wd_i;
         wreg_o <= wreg_i;
         case (alusel_i)
             `EXE_RES_LOGIC: begin
-                wdata_o <= logicout;
+                wdata_o <= logicout;    //Ñ¡ÔñÂß¼­ÔËËã
+            end
+            `EXE_RES_SHIFT: begin
+                wdata_o <= shiftres;    //Ñ¡ÔñÒÆÎ»ÔËËã
             end 
             default: begin
                 wdata_o <= `ZeroWord;
