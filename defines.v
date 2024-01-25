@@ -33,6 +33,13 @@
 `define EXE_SRA         6'b000_011      //指令srv的功能码(算术右移)
 `define EXE_SRAV        6'b000_111      //指令srav的功能码(算术右移)
 
+`define EXE_MOVZ        6'b001_010      //指令movz的功能码
+`define EXE_MOVN        6'b001_011      //指令movn的功能码
+`define EXE_MFHI        6'b010_000      //指令mfhi的功能码
+`define EXE_MTHI        6'b010_001      //指令mthi的功能码
+`define EXE_MFLO        6'b010_010      //指令mflo的功能码
+`define EXE_MTLO        6'b010_011      //指令mtlo的功能码
+
 `define EXE_SYNC        6'b001_111      //指令sync的功能码
 `define EXE_NOP         6'b000_000      //指令nop的功能码
 `define EXE_PREF        6'b110_011      //指令pref的指令码
@@ -56,11 +63,19 @@
 `define EXE_SRA_OP      8'b00000011
 `define EXE_SRAV_OP     8'b00000111
 
+`define EXE_MOVZ_OP     8'b00001010
+`define EXE_MOVN_OP     8'b00001011
+`define EXE_MFHI_OP     8'b00010000
+`define EXE_MTHI_OP     8'b00010001
+`define EXE_MFLO_OP     8'b00010010
+`define EXE_MTLO_OP     8'b00010011
+
 `define EXE_NOP_OP    8'b00000000
 
 //AluSel
 `define EXE_RES_LOGIC   3'b001
-`define EXE_RES_SHIFT 3'b010
+`define EXE_RES_SHIFT   3'b010
+`define EXE_RES_MOVE    3'b011
 
 `define EXE_RES_NOP     3'b000
 

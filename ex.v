@@ -8,6 +8,21 @@ module ex (
     input wire [`RegBus] reg2_i,
     input wire [`RegAddrBus] wd_i,
     input wire wreg_i,
+    //HILO模块给出的HI、LO寄存器的值
+    input wire [`RegBus] hi_i,
+    input wire [`RegBus] lo_i,
+    //回写阶段的指令是否要写HI、LO
+    input wire [`RegBus] wb_hi_i,
+    input wire [`RegBus] wb_lo_i,
+    input wire wb_whilo_i,
+    //访存阶段的指令是否要写HI、LO
+    input wire [`RegBus] mem_hi_i,
+    input wire [`RegBus] mem_lo_i,
+    input wire mem_whilo_i,
+    //处于执行阶段的指令对HI、LO的写操作请求
+    output reg [`RegBus] hi_o,
+    output reg [`RegBus] lo_o,
+    output reg whilo_o,
     //执行的结果
     output reg [`RegAddrBus] wd_o,  //要写入的寄存器地址
     output reg wreg_o,              //是否要写入寄存器
@@ -16,6 +31,47 @@ module ex (
 
     reg [`RegBus] logicout;         //保存逻辑运算的结果
     reg [`RegBus] shiftres;         //保存移位运算的结果
+    reg [`RegBus] moveres;
+    reg [`RegBus] HI;               //保存HI寄存器的最新值
+    reg [`RegBus] LO;               //保存LO寄存器的最新值
+
+    //得到最新HILO的值
+    always @(*) begin
+        if(rst == `RstEnable) begin
+            {HI,LO} <= {`ZeroWord,`ZeroWord};
+        end else if(mem_whilo_i == `WriteEnable) begin
+            {HI,LO} <= {mem_hi_i,mem_lo_i};
+        end else if(wb_whilo_i == `WriteEnable) begin
+            {HI,LO} <= {wb_hi_i,wb_lo_i};
+        end else begin
+            {HI,LO} <= {hi_i,lo_i};
+        end
+    end
+
+    //MFHI、MFLO、MOVN、MOVZ指令
+    always @(*) begin
+        if(rst == `RstEnable) begin
+            moveres <= `ZeroWord;
+        end else begin
+            moveres <= `ZeroWord;
+            case(aluop_i)
+                `EXE_MFHI_OP: begin
+                    moveres <= HI;
+                end
+                `EXE_MFLO_OP: begin
+                    moveres <= LO;
+                end
+                `EXE_MOVN_OP: begin
+                    moveres <= reg1_i;;
+                end
+                `EXE_MOVZ_OP: begin
+                    moveres <= reg1_i;
+                end
+                default: begin
+                end
+            endcase
+        end
+    end
 
 
     //一：依据aluop_i指示的子类型进行运算
@@ -77,11 +133,35 @@ module ex (
             end
             `EXE_RES_SHIFT: begin
                 wdata_o <= shiftres;    //选择移位运算
+            end
+            `EXE_RES_MOVE: begin
+                wdata_o <= moveres;
             end 
             default: begin
                 wdata_o <= `ZeroWord;
             end
         endcase
+    end
+
+    //是MTHI、MTLO指令，需要给出whilo_o、hi_o、lo_o的值
+    always @(*) begin
+        if(rst == `RstEnable) begin
+            whilo_o <= `WriteDisable;
+            hi_o <= `ZeroWord;
+            lo_o <= `ZeroWord;
+        end else if(aluop_i == `EXE_MTHI_OP) begin
+            whilo_o <= `WriteEnable;
+            hi_o <= reg1_i;
+            lo_o <= LO;         //写hi寄存器，lo保持不变     
+        end else if (aluop_i == `EXE_MTLO_OP) begin
+            whilo_o <= `WriteEnable;
+            hi_o <= HI;         //写lo寄存器，hi保持不变
+            lo_o <= reg1_i;     
+        end else begin
+            whilo_o <= `WriteDisable;
+            hi_o <= `ZeroWord;
+            lo_o <= `ZeroWord;
+        end
     end
     
 endmodule
