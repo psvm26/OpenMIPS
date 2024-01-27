@@ -6,7 +6,7 @@ module openmips_min_sopc_tb ();
     reg CLOCK_50;
     reg rst;
 
-    //每隔10ns信号翻转一次，一个周期是20ns，50MHz
+    //每隔10ns信号翻转�?次，�?个周期是20ns�?50MHz
     initial begin
         CLOCK_50 = 1'b0;
         forever #10 CLOCK_50 = ~CLOCK_50;
@@ -15,7 +15,7 @@ module openmips_min_sopc_tb ();
     initial begin
         rst = `RstEnable;
         #195 rst = `RstDisable;
-        #1000 $stop;
+        #2000 $stop;
     end
 
     openmips_min_sopc openmips_min_sopc0(
