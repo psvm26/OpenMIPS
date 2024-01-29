@@ -15,6 +15,8 @@
 `define False_v         1'b0            //逻辑假
 `define ChipEnable      1'b1            //芯片使能
 `define ChipDisable     1'b0            //芯片禁止
+`define Stop            1'b1            //流水线暂停
+`define NoStop          1'b0            //流水线继续
 
 //指令相关
 `define EXE_AND         6'b100_100      //指令and的功能码
@@ -61,6 +63,11 @@
 `define EXE_MULT        6'b011000
 `define EXE_MULTU       6'b011001
 `define EXE_MUL         6'b000010
+
+`define EXE_MADD        6'b000000
+`define EXE_MADDU       6'b000001
+`define EXE_MSUB        6'b000100
+`define EXE_MSUBU       6'b000101
 
 `define EXE_NOP         6'b000000
 `define SSNOP           32'b00000000000000000000000001000000
@@ -110,6 +117,11 @@
 `define EXE_MULT_OP     8'b00011000
 `define EXE_MULTU_OP    8'b00011001
 `define EXE_MUL_OP      8'b10101001
+
+`define EXE_MADD_OP     8'b10100110
+`define EXE_MADDU_OP    8'b10101000
+`define EXE_MSUB_OP     8'b10101010
+`define EXE_MSUBU_OP    8'b10101011
 
 `define EXE_NOP_OP      8'b00000000
 

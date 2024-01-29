@@ -24,7 +24,8 @@ module id (
     output reg [`RegBus] reg1_o,            
     output reg [`RegBus] reg2_o,           
     output reg [`RegAddrBus] wd_o,          
-    output reg wreg_o                    
+    output reg wreg_o,
+    output wire stallreq                  
 );
     
    
@@ -35,9 +36,9 @@ module id (
 
 
     reg[`RegBus] imm;
-
-
     reg instvalid;
+
+    assign stallreq = `NoStop;
 
 
     always @(*) begin
@@ -371,6 +372,38 @@ module id (
                                     reg2_read_o <= `ReadEnable;
                                     instvalid <= `InstValid;
                                 end
+                        `EXE_MADD:  begin                   //madd
+                            wreg_o <= `WriteDisable;
+                            aluop_o <= `EXE_MADD_OP;
+                            alusel_o <= `EXE_RES_MUL;
+                            reg1_read_o <= `ReadEnable;
+                            reg2_read_o <= `ReadEnable;
+                            instvalid <= `InstValid;
+                        end  
+                        `EXE_MADDU: begin                   //maddu
+                            wreg_o <= `WriteDisable;
+                            aluop_o <= `EXE_MADDU_OP;
+                            alusel_o <= `EXE_RES_MUL;
+                            reg1_read_o <= `ReadEnable;
+                            reg2_read_o <= `ReadEnable;
+                            instvalid <= `InstValid;
+                        end
+                        `EXE_MSUB:  begin                   //msub
+                            wreg_o <= `WriteDisable;
+                            aluop_o <= `EXE_MSUB_OP;
+                            alusel_o <= `EXE_RES_MUL;
+                            reg1_read_o <= `ReadEnable;
+                            reg2_read_o <= `ReadEnable;
+                            instvalid <= `InstValid;
+                        end
+                        `EXE_MSUBU: begin                   //msubu
+                            wreg_o <= `WriteDisable;
+                            aluop_o <= `EXE_MSUBU_OP;
+                            alusel_o <= `EXE_RES_MUL;
+                            reg1_read_o <= `ReadEnable;
+                            reg2_read_o <= `ReadEnable;
+                            instvalid <= `InstValid;
+                        end
                     endcase
                 end
                 default:begin
