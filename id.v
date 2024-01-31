@@ -250,6 +250,20 @@ module id (
                                     reg2_read_o <= `ReadEnable;
                                     instvalid <= `InstValid;
                                 end
+                                `EXE_DIV:   begin  
+                                    wreg_o <= `WriteDisable;                 //div                                  wreg_o <= `WriteDisable;
+                                    aluop_o <= `EXE_DIV_OP;
+                                    reg1_read_o <= `ReadEnable;
+                                    reg2_read_o <= `ReadEnable;
+                                    instvalid <= `InstValid;
+                                end
+                                `EXE_DIVU:   begin                  //divu
+                                    wreg_o <= `WriteDisable;
+                                    aluop_o <= `EXE_DIVU_OP;
+                                    reg1_read_o <= `ReadEnable;
+                                    reg2_read_o <= `ReadEnable;
+                                    instvalid <= `InstValid;
+                                end
                                 default: begin
                                 end
                             endcase
