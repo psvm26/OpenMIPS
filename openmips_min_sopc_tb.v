@@ -6,7 +6,7 @@ module openmips_min_sopc_tb ();
     reg CLOCK_50;
     reg rst;
 
-    //姣忛殧10ns淇″彿缈昏浆涓?娆★紝涓?涓懆鏈熸槸20ns锛?50MHz
+    //每隔10ns信号翻转??次，??个周期是20ns??50MHz
     initial begin
         CLOCK_50 = 1'b0;
         forever #10 CLOCK_50 = ~CLOCK_50;

@@ -2,23 +2,32 @@
 module pc_reg (
     input wire clk,
     input wire rst,
-    input wire [5:0] stall,         //æ¥è‡ªæ§åˆ¶æ¨¡å—CTRL
-    output reg [`InstAddrBus] pc,   //è¦è¯»å–çš„æŒ‡ä»¤åœ°å€
-    output reg ce                   //æŒ‡ä»¤å­˜å‚¨å™¨ä½¿èƒ½ä¿¡å·
+    input wire [5:0] stall,         //À´×Ô¿ØÖÆÄ£¿éCTRL
+    //À´×ÔÒëÂë½×¶ÎIDÄ£¿éµÄĞÅÏ¢
+
+    input wire branch_flag_i,       //ÊÇ·ñ·¢Éú×ªÒÆ
+    input wire [`RegBus] branch_target_address_i,//×ªÒÆµ½µÄÄ¿±êµØÖ·
+
+    output reg [`InstAddrBus] pc,   //Òª¶ÁÈ¡µÄÖ¸ÁîµØÖ·
+    output reg ce                    //Ö¸Áî´æ´¢Æ÷Ê¹ÄÜĞÅºÅ
 );
     always @(posedge clk) begin
         if(rst == `RstEnable) begin
-            ce <= `ChipDisable;     //å¤ä½æ—¶ç¦ç”¨å‚¨å­˜å™¨
+            ce <= `ChipDisable;     //¸´Î»Ê±½ûÓÃ´¢´æÆ÷
         end else begin
-            ce <= `ChipEnable;      //å¤ä½ç»“æŸå‚¨å­˜å™¨ä½¿èƒ½
+            ce <= `ChipEnable;      //¸´Î»½áÊø´¢´æÆ÷Ê¹ÄÜ
         end
     end 
 
     always @(posedge clk) begin
         if(ce == `ChipDisable) begin
             pc <= 32'h0000_0000;
-        end else if(stall[0] == `NoStop) begin  //å½“stallä¸ºNoStopæ—¶pcåŠ 4ï¼Œå¦åˆ™pcä¸å˜
-            pc <= pc + 4;           //å‚¨å­˜å™¨ä½¿èƒ½æ—¶æ¯å‘¨æœŸpcåŠ 4
+        end else if(stall[0] == `NoStop) begin  //µ±stallÎªNoStopÊ±pc¼Ó4£¬·ñÔòpc²»±ä
+            if(branch_flag_i == `Branch) begin
+                pc <= branch_target_address_i;
+            end else begin
+            pc <= pc + 4;           //´¢´æÆ÷Ê¹ÄÜÊ±Ã¿ÖÜÆÚpc¼Ó4
+            end
         end
     end
 endmodule

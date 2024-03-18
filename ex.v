@@ -24,6 +24,10 @@ module ex (
     //来自除法模块的输入
     input wire [`DoubleRegBus] div_result_i,//除法运算结果
     input wire div_ready_i,                 //除法运算是否结束
+    //处于执行阶段的转移指令要返回的地址
+    input wire [`RegBus] link_address_i,
+    //当前执行阶段的指令是否位于延迟槽
+    input wire [`RegBus] is_in_delayslot_i,
     //处于执行阶段的指令对HI、LO的写操作请求
     output reg [`RegBus] hi_o,
     output reg [`RegBus] lo_o,
@@ -415,6 +419,9 @@ module ex (
             end 
             `EXE_RES_MUL: begin         //乘法指令mul
                 wdata_o <= mulres[31:0];
+            end
+            `EXE_RES_JUMP_BRANCH: begin
+                wdata_o <= link_address_i;
             end
             default: begin
                 wdata_o <= `ZeroWord;
