@@ -28,6 +28,8 @@ module ex (
     input wire [`RegBus] link_address_i,
     //当前执行阶段的指令是否位于延迟槽
     input wire [`RegBus] is_in_delayslot_i,
+    //新增输入接口inst_i，其值就是当前处于执行阶段的指令
+    input wire [`RegBus] inst_i,
     //处于执行阶段的指令对HI、LO的写操作请求
     output reg [`RegBus] hi_o,
     output reg [`RegBus] lo_o,
@@ -43,7 +45,11 @@ module ex (
     output reg [`RegBus] div_opdata1_o,     //被除数
     output reg [`RegBus] div_opdata2_o,     //除数
     output reg div_start_o,                 //是否开始除法运算
-    output reg signed_div_o                 //是否是有符号除法
+    output reg signed_div_o,                //是否是有符号除法
+    //为加载储存指令准备的接口
+    output wire [`AluOpBus] aluop_o,
+    output wire [`RegBus] mem_addr_o,
+    output wire [`RegBus] reg2_o
 );
 
     reg [`RegBus] logicout;         //保存逻辑运算的结果
@@ -89,6 +95,18 @@ module ex (
 
     //对操作数1逐位取反，赋给reg1_i_not
     assign reg1_i_not = ~reg1_i;
+
+    //将aluop_o传到访存阶段，利用此确定加载储存类型
+    assign aluop_o = aluop_i;
+
+    //mem_addr_o会传递到访存阶段，为加载储存指令对应的储存器地址，
+    //此处reg1_i就是指令中地址为base的通用寄存器的值，inst_i[15:0]
+    //为指令中的offset
+    assign mem_addr_o = reg1_i + {{16{inst_i[15]}}, inst_i[15:0]};
+
+    //reg2_i是储存指令要储存的数据，或lwl、lwr指令要加载到的目的寄存器的原始值
+    assign reg2_o = reg2_i;
+
 
     //依据不同的算术类型，给aritmeticres赋值
     always @(*) begin

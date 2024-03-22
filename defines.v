@@ -87,6 +87,21 @@
 `define EXE_BLTZAL      5'b10000
 `define EXE_BNE         6'b000101
 
+`define EXE_LB          6'b100000
+`define EXE_LBU         6'b100100
+`define EXE_LH          6'b100001
+`define EXE_LHU         6'b100101
+`define EXE_LL          6'b110000
+`define EXE_LW          6'b100011
+`define EXE_LWL         6'b100010
+`define EXE_LWR         6'b100110
+`define EXE_SB          6'b101000
+`define EXE_SC          6'b111000
+`define EXE_SH          6'b101001
+`define EXE_SW          6'b101011
+`define EXE_SWL         6'b101010
+`define EXE_SWR         6'b101110
+
 `define EXE_NOP         6'b000000
 `define SSNOP           32'b00000000000000000000000001000000
 
@@ -157,6 +172,23 @@
 `define EXE_BLTZAL_OP   8'b01001010
 `define EXE_BNE_OP      8'b01010010
 
+`define EXE_LB_OP       8'b11100000
+`define EXE_LBU_OP      8'b11100100
+`define EXE_LH_OP       8'b11100001
+`define EXE_LHU_OP      8'b11100101
+`define EXE_LL_OP       8'b11110000
+`define EXE_LW_OP       8'b11100011
+`define EXE_LWL_OP      8'b11100010
+`define EXE_LWR_OP      8'b11100110
+`define EXE_PREF_OP     8'b11110011
+`define EXE_SB_OP       8'b11101000
+`define EXE_SC_OP       8'b11111000
+`define EXE_SH_OP       8'b11101001
+`define EXE_SW_OP       8'b11101011
+`define EXE_SWL_OP      8'b11101010
+`define EXE_SWR_OP      8'b11101110
+`define EXE_SYNC_OP     8'b00001111
+
 `define EXE_NOP_OP      8'b00000000
 
 //AluSel
@@ -166,6 +198,7 @@
 `define EXE_RES_ARITHMETIC 3'b100	
 `define EXE_RES_MUL     3'b101
 `define EXE_RES_JUMP_BRANCH 3'b110
+`define EXE_RES_LOAD_STORE 3'b111
 
 `define EXE_RES_NOP     3'b000
 
@@ -184,6 +217,13 @@
 `define RegNum          32              //通用寄存器的数量
 `define RegNumLog2      5               //寻址通用寄存器使用的地址位数
 `define NOPRegAddr      5'b00000     
+
+//数据储存器ram
+`define DataAddrBus 31:0
+`define DataBus 31:0
+`define DataMemNum 131071
+`define DataMemNumLog2 17
+`define ByteWidth 7:0
 
 //除法div
 `define DivFree 2'b00

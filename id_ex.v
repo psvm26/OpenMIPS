@@ -13,6 +13,7 @@ module id_ex (
     input wire [`RegBus] id_link_address,//处于译码阶段的转移指令要保存的返回地址
     input wire id_is_in_delayslot,      //当前处于译码阶段的指令是否位于延迟槽
     input wire next_inst_in_delayslot_i,//下一条进入译码阶段的指令是否位于延迟槽
+    input wire [`RegBus] id_inst,       //当前处于译码阶段的指令
     //传递到执行阶段的信息
     output reg [`AluOpBus] ex_aluop,
     output reg [`AluSelBus] ex_alusel,
@@ -22,7 +23,8 @@ module id_ex (
     output reg ex_wreg,
     output reg [`RegBus] ex_link_address,//处于执行阶段的转移指令要保存返回地址
     output reg ex_is_in_delayslot,       //当前处于执行阶段的指令是否位于延迟槽
-    output reg is_in_delayslot_o      //当前处于译码阶段的指令是否位于延迟槽
+    output reg is_in_delayslot_o,     //当前处于译码阶段的指令是否位于延迟槽
+    output reg [`RegBus] ex_inst        //传递到EX模块
 );
     
     always @(posedge clk) begin
@@ -55,6 +57,7 @@ module id_ex (
             ex_link_address <= id_link_address;
             ex_is_in_delayslot <= id_is_in_delayslot;
             is_in_delayslot_o <= next_inst_in_delayslot_i;
+            ex_inst <= id_inst;
         end
     end
 endmodule
