@@ -13,6 +13,10 @@ module mem (
     input wire [`RegBus] reg2_i,
     //来自外部数据存储器RAM的信息
     input wire [`RegBus] mem_data_i,
+    
+    input wire LLbit_i,             //LLbit模块给出的LLbit寄存器
+    input wire wb_LLbit_we_i,       //回写阶段的指令是否要写LLbit寄存器
+    input wire wb_LLbit_value_i,    //回写阶段指令要写入LLbit寄存器的值
     //访存的结果
     output reg [`RegAddrBus] wd_o,
     output reg wreg_o,
@@ -25,14 +29,30 @@ module mem (
     output wire mem_we_o,
     output reg [3:0] mem_sel_o,
     output reg [`RegBus] mem_data_o,
-    output reg mem_ce_o
+    output reg mem_ce_o,
+
+    output reg LLbit_we_o,          //访存阶段的指令是否要写入LLbit寄存器
+    output reg LLbit_value_o        //访存器指令要写入LLbit寄存器的值
 );
 
     wire [`RegBus] zero32;
     reg mem_we;
+    reg LLbit;
 
     assign mem_we_o = mem_we;   //外部数据储存器的读写信号
     assign zero32 = `ZeroWord;
+
+    always @(*) begin
+        if(rst == `RstEnable) begin
+            LLbit <= 1'b0;
+        end else begin
+            if(wb_LLbit_we_i == 1'b1) begin
+                LLbit <= wb_LLbit_value_i;
+            end else begin
+                LLbit <= LLbit_i;
+            end
+        end
+    end
 
     always @(*) begin
         if(rst == `RstEnable) begin
@@ -47,6 +67,8 @@ module mem (
             mem_sel_o <= 4'b0000;
             mem_data_o <= `ZeroWord;
             mem_ce_o <= `ChipDisable;
+            LLbit_we_o <= 1'b0;
+            LLbit_value_o <= 1'b0;
         end else begin
             wd_o <= wd_i;
             wreg_o <= wreg_i;
@@ -58,6 +80,10 @@ module mem (
             mem_we <= `WriteDisable;
             mem_sel_o <= 4'b1111;
             mem_ce_o <= `ChipDisable;
+            LLbit_we_o <= 1'b0;
+            LLbit_value_o <= 1'b0;
+            mem_ce_o <= `ChipEnable;
+            mem_we <= `WriteDisable;
             case(aluop_i) 
                 `EXE_LB_OP: begin
                     mem_addr_o <= mem_addr_i;
@@ -200,6 +226,15 @@ module mem (
                         end
                     endcase
                 end
+                `EXE_LL_OP: begin
+                    mem_addr_o <= mem_addr_i;
+                    mem_we <= `WriteDisable;
+                    wdata_o <= mem_data_i;
+                    LLbit_we_o <= 1'b1;
+                    LLbit_value_o <= 1'b1;
+                    mem_sel_o <= 4'b1111;
+                    mem_ce_o <= `ChipEnable;
+                end
                 `EXE_SB_OP: begin
                     mem_addr_o <= mem_addr_i;
                     mem_we <= `WriteEnable;
@@ -298,6 +333,20 @@ module mem (
                             mem_sel_o <= 4'b0000;
                         end
                     endcase
+                end
+                `EXE_SC_OP: begin
+                    if(LLbit == 1'b1) begin
+                        LLbit_we_o <= 1'b1;
+                        LLbit_value_o <= 1'b0;
+                        mem_addr_o <= mem_addr_i;
+                        mem_we <= `WriteEnable;
+                        mem_data_o <= reg2_i;
+                        wdata_o <= 32'b1;
+                        mem_sel_o <= 4'b1111;
+                        mem_ce_o <= `ChipEnable;
+                    end else begin
+                        wdata_o <= 32'b0;
+                    end
                 end
                 default:    begin
                 end

@@ -4,7 +4,7 @@ module id (
     input wire [`InstAddrBus] pc_i,         
     input wire [`InstBus] inst_i,    
 
-    input wire[`AluOpBus] ex_aluop_i,      
+    input wire[`AluOpBus] ex_aluop_i,      //处于执行阶段指令的运算子类型
 
     input wire [`RegBus] reg1_data_i,       
     input wire [`RegBus] reg2_data_i,       
@@ -15,7 +15,7 @@ module id (
 
     input wire mem_wreg_i,                   
     input wire [`RegBus] mem_wdata_i,
-    input wire [`RegAddrBus] mem_wd_i,
+    input wire [`RegAddrBus] mem_wd_i, 
 
     //是否需要延迟槽
     input wire is_in_delayslot_i,
@@ -693,6 +693,15 @@ module id (
                     wd_o <= inst_i[20:16];           
                     instvalid <= `InstValid;
                 end
+                `EXE_LL:     begin                   //ll
+                    wreg_o <= `WriteEnable;         
+                    aluop_o <= `EXE_LL_OP;          
+                    alusel_o <= `EXE_RES_LOAD_STORE;     
+                    reg1_read_o <= `ReadEnable;     
+                    reg2_read_o <= `ReadDisable;
+                    wd_o <= inst_i[20:16];           
+                    instvalid <= `InstValid;
+                end
                 `EXE_SB:    begin                   //sb
                     wreg_o <= `WriteDisable;         
                     aluop_o <= `EXE_SB_OP;          
@@ -733,10 +742,19 @@ module id (
                     reg2_read_o <= `ReadEnable;           
                     instvalid <= `InstValid;
                 end
+                `EXE_SC:    begin                   //sc
+                    wreg_o <= `WriteEnable;         
+                    aluop_o <= `EXE_SC_OP;          
+                    alusel_o <= `EXE_RES_LOAD_STORE;     
+                    reg1_read_o <= `ReadEnable;     
+                    reg2_read_o <= `ReadEnable;    
+                    wd_o <= inst_i[20:16];       
+                    instvalid <= `InstValid;
+                end
                 default:begin
                 end
             endcase
-
+                
             if(inst_i[31:21] == 11'b000_0000_0000) begin
                 if(op3 == `EXE_SLL) begin                       //sll
                     wreg_o <= `WriteEnable;
